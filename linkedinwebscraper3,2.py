@@ -7,7 +7,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import csv
  
-
 #logsin to linkedin account
 #REPLACE 'Insert username here' WITH USERNAME
 #REPLACE 'Insert password here' WITH PASSWORD
@@ -16,15 +15,14 @@ def login(driver):
         driver.get("https://linkedin.com/uas/login")
         wait = WebDriverWait(driver, 10)
         username = wait.until(EC.presence_of_element_located((By.ID, "username")))
-        username.send_keys("Insert username here")
+        username.send_keys("insert username here")
         pword = wait.until(EC.presence_of_element_located((By.ID, "password")))
-        pword.send_keys("Insert password here")
+        pword.send_keys("insert password here")
         wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']"))).click()
     except Exception as e:
         print(f"Login failed: {e}")
         driver.quit()
         raise SystemExit("Script execution stopped due to login failure.")
-
 
 #opensprofile and scrolls to bottom of the page
 def openprofile(profile_url,driver):
@@ -45,9 +43,6 @@ def openprofile(profile_url,driver):
     except:
         print('Failed to load profile')
         raise SystemExit()
-
-
-
 
 #extracts the headcount insights
 def extract(driver):
@@ -78,7 +73,7 @@ def storedata(driver):
         with open('links.csv',"r") as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             for row in csv_reader:
-                names.append(row[0].strip(r'\n'))
+                names.append(row[0])
                 openprofile(row[1],driver)
                 value = str(extract(driver)).strip('%')
                 trend.append(value)
@@ -86,28 +81,15 @@ def storedata(driver):
         print('links.csv not found ensure it is in the same folder')
         raise SystemExit()
     
-    if not os.path.exists('IndustryTrends.csv'):
-        with open('IndustryTrends.csv',"w", newline='') as initialise:
-            csv_writer = csv.writer(initialise,delimiter=',')
+    with open('IndustryTrends.csv',"a", newline='') as file:
+        csv_writer = csv.writer(file,delimiter=',')
+        if os.path.getsize('IndustryTrends.csv') == 0:
             csv_writer.writerow(names)
-        
-    for i in range(0,len(names)): 
-        with open('IndustryTrends.csv',"a", newline='') as file:
-            csv_writer = csv.writer(file,delimiter=',')
-            csv_writer.writerow(trend)
-
-            
-            
-            
-
-
-
-   
+        csv_writer.writerow(trend)
 
 with webdriver.Chrome() as driver:
     login(driver)
     storedata(driver)
-
 
 
 
